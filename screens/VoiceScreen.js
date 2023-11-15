@@ -1,63 +1,102 @@
-import React, { useState, useEffect } from 'react';
-import Voice from 'react-native-community/voice';
+import * as React from 'react';
+import { View, StyleSheet, Button } from 'react-native';
+import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
 
-const VoiceScreen = () => {
-  const [transcript, setTranscript] = useState('');
-  const [listening, setListening] = useState(false);
 
-  useEffect(() => {
-    Voice.onSpeechStart = () => {
-      setListening(true);
-    };
+export default function VoiceScreen() {
+  const [recording, setRecording] = React.useState();
+  const [sound, setSound] = React.useState();
 
-    Voice.onSpeechEnd = () => {
-      setListening(false);
-    };
-
-    Voice.onSpeechResults = (e) => {
-      const speechResult = e.value.join(' ');
-      setTranscript(speechResult);
-
-      // Call your API here with the transcript
-      // If the API call is successful, you can stop listening
-      // Voice.stop();
-    };
-
-    return () => {
-      // Clean up listeners when component unmounts
-      Voice.destroy().then(Voice.removeAllListeners);
-    };
-  }, []);
-
-  const startListening = async () => {
+  async function startRecording() {
     try {
-      await Voice.start('en-US');
-    } catch (error) {
-      console.error(error);
-    }
-  };
+      console.log('Requesting permissions..');
+      await Audio.requestPermissionsAsync();
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
 
-  const stopListening = async () => {
+      console.log('Starting recording..');
+      const { recording } = await Audio.Recording.createAsync( Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      setRecording(recording);
+      console.log('Recording started');
+    } catch (err) {
+      console.error('Failed to start recording', err);
+    }
+  }
+
+  async function stopRecording() {
+    console.log('Stopping recording..');
+    setRecording(undefined);
+    
+    await recording.stopAndUnloadAsync();
+    
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+    });
+  
+    const uri = recording.getURI();
+    console.log('Recording stopped and stored at', uri);
+  
+    // Define the destination directory and filename
+    const destinationUri = FileSystem.documentDirectory + 'recording.mp3';
+  
     try {
-      await Voice.stop();
+      // Move the recorded file to the desired location
+      await FileSystem.moveAsync({
+        from: uri,
+        to: destinationUri,
+      });
+  
+      console.log('Recording saved at', destinationUri);
     } catch (error) {
-      console.error(error);
+      console.error('Error moving the recording:', error);
     }
-  };
+  }
+  
+  async function playSound() {
+    console.log('Loading Sound');
+  
+    // Replace 'your_custom_filename.mp3' with the actual filename you used in stopRecording
+    const soundUri = FileSystem.documentDirectory + 'recording.mp3';
+  
+    const { sound } = await Audio.Sound.createAsync({
+      uri: soundUri,
+    });
+  
+    setSound(sound);
+  
+    console.log('Playing Sound');
+    await sound.playAsync();
+  }
 
-  const resetTranscript = () => {
-    setTranscript('');
-  };
+  React.useEffect(() => {
+    return sound
+      ? () => {
+          console.log('Unloading Sound');
+          sound.unloadAsync();
+        }
+      : undefined;
+  }, [sound]);
 
   return (
-    <View>
-      <Text>Microphone: {listening ? '🎤' : '🔇'}</Text>
-      <Button title="Start" onPress={startListening} />
-      <Button title="Stop" onPress={stopListening} />
-      <Button title="Reset" onPress={resetTranscript} />
-      <Text>{transcript}</Text>
+    <View style={styles.container}>
+      <Button
+        title={recording ? 'Stop Recording' : 'Start Recording'}
+        onPress={recording ? stopRecording : startRecording}
+      />
+        <Button title="Play Sound" onPress={playSound} />
     </View>
   );
-};
+}
 
-export default VoiceScreen;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: '#ecf0f1',
+    padding: 10,
+  },
+});
