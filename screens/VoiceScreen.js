@@ -2,6 +2,7 @@ import * as React from 'react';
 import { View, StyleSheet, Button } from 'react-native';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
+import { TextService }  from '../services/TextService.js';
 
 
 export default function VoiceScreen() {
@@ -49,11 +50,13 @@ export default function VoiceScreen() {
         from: uri,
         to: destinationUri,
       });
-  
+     
       console.log('Recording saved at', destinationUri);
     } catch (error) {
       console.error('Error moving the recording:', error);
     }
+
+    await TextService({ recording });
   }
   
   async function playSound() {
