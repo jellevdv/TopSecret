@@ -1,34 +1,41 @@
 import axios from 'axios';
-import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system'; // Assuming you're using Expo for mobile development
 
-export const TextService = ({ soundFile }) => {
-    const sendToApi = async () => {
-      try {
-        const formData = new FormData();
-        formData.append('file', soundFile);
+export const TextService = async (soundFile) => {
+  try {
+    console.log('soundFile', soundFile);
 
-        const response = await axios.post('http://localhost:8080/', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+    // Get the file URI from the soundFile object
+    const fileURI = soundFile.status.uri;
+    console.log('fileuri',fileURI);
 
-        console.log('API Response:', response.data);
+    // Read the file contents
+    const fileInfo = await FileSystem.getInfoAsync(fileURI);
+    const fileContent = await FileSystem.readAsStringAsync(fileURI, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
 
-        // Do something with the API response if needed
-      } catch (error) {
-        console.error('Error sending data to API:', error.message);
-        // Handle the error as needed
-      }
-    };
+    // Create FormData and append the file
+    const formData = new FormData();
+    formData.append('File', {
+      uri: fileURI,
+      type: fileInfo.mimeType,
+      name: 'recording.mp3',
+      data: fileContent,
+    });
+    console.log('formdata', formData);
+    // Send FormData to the API
+    const response = await axios.post('http://team3-poc.my-clay.com/api/command', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
 
-    sendToApi();
+    console.log('API Response:', response.data);
 
-    // Cleanup logic, unload sound file if it's an Audio.Sound object
-    if (soundFile instanceof Audio.Sound) {
-      soundFile.unloadAsync();
-    }
-
-  // You can return JSX here if you want to render something related to this component
-  return null;
+    return response.data; 
+  } catch (error) {
+    console.error('Error sending data to API:', error.message);
+    throw error;
+  }
 };

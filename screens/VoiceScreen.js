@@ -3,7 +3,7 @@ import { View, StyleSheet, Button } from 'react-native';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import { TextService }  from '../services/TextService.js';
-
+import * as Speech from 'expo-speech';
 
 export default function VoiceScreen() {
   const [recording, setRecording] = React.useState();
@@ -56,7 +56,16 @@ export default function VoiceScreen() {
       console.error('Error moving the recording:', error);
     }
 
-    await TextService({ recording });
+    const soundUri = FileSystem.documentDirectory + 'recording.mp3';
+  
+    const soundToSend = await Audio.Sound.createAsync({
+      uri: soundUri,
+    });
+    const response = await TextService(soundToSend);
+    console.log('response in voiceScreen', response.executingCommand);
+    await Speech.speak(response.executingCommand, {
+      language: 'en', // Specify the language if needed
+    });
   }
   
   async function playSound() {
