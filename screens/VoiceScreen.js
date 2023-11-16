@@ -64,7 +64,7 @@ export default function VoiceScreen() {
     const response = await TextService(soundToSend);
     console.log('response in voiceScreen', response.executingCommand);
     await Speech.speak(response.executingCommand, {
-      language: 'en', // Specify the language if needed
+      language: 'en',
     });
   }
   

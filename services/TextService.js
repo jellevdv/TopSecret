@@ -17,7 +17,7 @@ export const TextService = async (soundFile) => {
 
     // Create FormData and append the file
     const formData = new FormData();
-    formData.append('File', {
+    formData.append('file', {
       uri: fileURI,
       type: fileInfo.mimeType,
       name: 'recording.mp3',
@@ -25,7 +25,7 @@ export const TextService = async (soundFile) => {
     });
     console.log('formdata', formData);
     // Send FormData to the API
-    const response = await axios.post('http://team3-poc.my-clay.com/api/command', formData, {
+    const response = await axios.post('http://team3-poc.my-clay.com/api/command?type=elevator', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
