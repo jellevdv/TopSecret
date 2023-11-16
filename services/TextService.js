@@ -24,7 +24,7 @@ export const TextService = async (soundFile, type) => {
     });
     console.log('formdata', formData);
     // Send FormData to the API
-    const response = await axios.post(`http://team3-poc.my-clay.com/api/command?type=${type}`, formData, {
+    const response = await axios.post(`https://team3-poc.my-clay.com/api/command?type=${type}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
