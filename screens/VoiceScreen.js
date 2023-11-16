@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { View, StyleSheet, Button } from 'react-native';
+import { View, StyleSheet, Button, Dimensions, TouchableOpacity, Text } from 'react-native';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import { TextService }  from '../services/TextService.js';
 import * as Speech from 'expo-speech';
+const { width, height } = Dimensions.get('window');
 
 export default function VoiceScreen() {
   const [recording, setRecording] = React.useState();
@@ -95,20 +96,36 @@ export default function VoiceScreen() {
 
   return (
     <View style={styles.container}>
-      <Button
-        title={recording ? 'Stop Recording' : 'Start Recording'}
-        onPress={recording ? stopRecording : startRecording}
-      />
-        <Button title="Play Sound" onPress={playSound} />
-    </View>
+    <TouchableOpacity
+      style={styles.customButton}
+      onPressIn={startRecording}
+      onPressOut={stopRecording}
+    >
+      <Text style={styles.buttonText}>
+        {recording ? 'Recording...' : 'Touch to Record'}
+      </Text>
+    </TouchableOpacity>
+  </View>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = {
   container: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: '#ecf0f1',
-    padding: 10,
+    alignItems: 'center',
   },
-});
+  customButton: {
+    width: width * 0.9,
+    height: height * 0.9,
+    backgroundColor: 'grey',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+};
