@@ -9,6 +9,7 @@ const { width, height } = Dimensions.get('window');
 export default function VoiceScreen() {
   const [recording, setRecording] = React.useState();
   const [sound, setSound] = React.useState();
+  const [type, setType] = React.useState('lock');
 
   async function startRecording() {
     try {
@@ -62,7 +63,7 @@ export default function VoiceScreen() {
     const soundToSend = await Audio.Sound.createAsync({
       uri: soundUri,
     });
-    const response = await TextService(soundToSend);
+    const response = await TextService(soundToSend, type);
     console.log('response in voiceScreen', response.executingCommand);
     await Speech.speak(response.executingCommand, {
       language: 'en',
@@ -85,6 +86,16 @@ export default function VoiceScreen() {
     await sound.playAsync();
   }
 
+  // Function to handle setting 'type' to 'lock'
+  const setTypeLock = () => {
+    setType('lock');
+  };
+
+  // Function to handle setting 'type' to 'elevator'
+  const setTypeElevator = () => {
+    setType('elevator');
+  };
+
   React.useEffect(() => {
     return sound
       ? () => {
@@ -105,6 +116,10 @@ export default function VoiceScreen() {
         {recording ? 'Recording...' : 'Touch to Record'}
       </Text>
     </TouchableOpacity>
+    <View style={styles.buttonContainer}>
+        <Button title="Lock" onPress={setTypeLock} color={type === 'lock' ? '#888' : '#0088ce'}/>
+        <Button title="Elevator" onPress={setTypeElevator} color={type === 'elevator' ? '#888' : '#0088ce'}/>
+      </View>
   </View>
   );
 }
@@ -117,14 +132,17 @@ const styles = {
   },
   customButton: {
     width: width * 0.9,
-    height: height * 0.9,
-    backgroundColor: 'grey',
+    height: height * 0.7,
+    backgroundColor: '#0088ce',
+    border: 2,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 10
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'black',
   },
   buttonText: {
-    color: 'white',
+    color: '#fff',
     fontSize: 24,
     fontWeight: 'bold',
   },

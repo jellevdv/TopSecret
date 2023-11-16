@@ -11,7 +11,7 @@ const Tab = createBottomTabNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Tab.Navigator
+      <Tab.Navigator 
         screenOptions={({ route }) => ({
           tabBarIcon: ({ focused, color, size }) => {
             let iconName;
@@ -28,8 +28,8 @@ export default function App() {
           },
         })}
         tabBarOptions={{
-          activeTintColor: 'blue',
-          inactiveTintColor: 'gray',
+          activeTintColor: '#0088ce',
+          inactiveTintColor: '#1e1e1e'
         }}
       >
         <Tab.Screen name="Voice" component={VoiceScreen} />

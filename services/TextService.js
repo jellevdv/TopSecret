@@ -1,13 +1,12 @@
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system'; // Assuming you're using Expo for mobile development
 
-export const TextService = async (soundFile) => {
+export const TextService = async (soundFile, type) => {
   try {
-    console.log('soundFile', soundFile);
+    console.log('type', type)
 
     // Get the file URI from the soundFile object
     const fileURI = soundFile.status.uri;
-    console.log('fileuri',fileURI);
 
     // Read the file contents
     const fileInfo = await FileSystem.getInfoAsync(fileURI);
@@ -25,7 +24,7 @@ export const TextService = async (soundFile) => {
     });
     console.log('formdata', formData);
     // Send FormData to the API
-    const response = await axios.post('http://team3-poc.my-clay.com/api/command?type=elevator', formData, {
+    const response = await axios.post(`http://team3-poc.my-clay.com/api/command?type=${type}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
