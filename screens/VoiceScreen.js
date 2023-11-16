@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { View, StyleSheet, Button, Dimensions, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, Button, Dimensions, TouchableOpacity, Text, Vibration } from 'react-native';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import { TextService }  from '../services/TextService.js';
 import * as Speech from 'expo-speech';
+import Icon from 'react-native-vector-icons/Ionicons';
 const { width, height } = Dimensions.get('window');
 
 export default function VoiceScreen() {
@@ -12,6 +13,7 @@ export default function VoiceScreen() {
   const [type, setType] = React.useState('lock');
 
   async function startRecording() {
+    startVibration();
     try {
       console.log('Requesting permissions..');
       await Audio.requestPermissionsAsync();
@@ -31,6 +33,7 @@ export default function VoiceScreen() {
   }
 
   async function stopRecording() {
+    stopVibration();
     console.log('Stopping recording..');
     setRecording(undefined);
     
@@ -67,6 +70,7 @@ export default function VoiceScreen() {
     console.log('response in voiceScreen', response.executingCommand);
     await Speech.speak(response.executingCommand, {
       language: 'en',
+      volume: 1
     });
   }
   
@@ -96,6 +100,16 @@ export default function VoiceScreen() {
     setType('elevator');
   };
 
+  const startVibration = () => {
+    //To start the vibration for the defined Duration
+    Vibration.vibrate(10000);
+  };
+
+  const stopVibration = () => {
+    //To Stop the vibration
+    Vibration.cancel();
+  };
+
   React.useEffect(() => {
     return sound
       ? () => {
@@ -112,9 +126,11 @@ export default function VoiceScreen() {
       onPressIn={startRecording}
       onPressOut={stopRecording}
     >
-      <Text style={styles.buttonText}>
-        {recording ? 'Recording...' : 'Touch to Record'}
-      </Text>
+      <View>
+        <Text style={styles.buttonText}>
+            <Icon name={recording ? 'mic-off-circle-outline' : 'mic-circle-outline'} size={200}/>
+        </Text>
+      </View>
     </TouchableOpacity>
     <View style={styles.buttonContainer}>
         <Button title="Lock" onPress={setTypeLock} color={type === 'lock' ? '#888' : '#0088ce'}/>
@@ -132,7 +148,7 @@ const styles = {
   },
   customButton: {
     width: width * 0.9,
-    height: height * 0.7,
+    height: height * 0.75,
     backgroundColor: '#0088ce',
     border: 2,
     justifyContent: 'center',
@@ -143,7 +159,11 @@ const styles = {
   },
   buttonText: {
     color: '#fff',
-    fontSize: 24,
+    fontSize: 44,
     fontWeight: 'bold',
   },
+  buttonContainer:{
+    flex: 1,
+    flexDirection: 'row',
+  }
 };
